@@ -1,0 +1,22 @@
+{
+  "name": "gl-shader-core",
+  "version": "0.0.0",
+  "description": "Core implementation of gl-shader without parser dependencies",
+  "main": "shader-core.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mikolalysenko/gl-shader-core.git"
+  },
+  "keywords": [
+    "webgl",
+    "shader"
+  ],
+  "author": "Mikola Lysenko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mikolalysenko/gl-shader-core/issues"
+  }
+}
