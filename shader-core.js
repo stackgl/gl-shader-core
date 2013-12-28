@@ -1,11 +1,12 @@
 "use strict"
 
 //Shader object
-function Shader(gl, prog, uniforms, attributes) {
+function Shader(gl, prog, uniforms, attributes, typeInfo) {
   this.gl = gl
   this.program = prog
   this.uniforms = uniforms
   this.attributes = attributes
+  this.types = typeInfo
 }
 
 //Binds the shader
@@ -258,7 +259,7 @@ function createShader(
   var attributeWrapper = createAttributeWrapper(gl, prog, attributes)
   
   //Return final linked shader object
-  return new Shader(gl, prog, uniformWrapper, attributeWrapper)
+  return new Shader(gl, prog, uniformWrapper, attributeWrapper, { uniforms: uniforms, attributes: attributes })
 }
 
 module.exports = createShader
