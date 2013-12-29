@@ -17,6 +17,8 @@ Constructs a packaged gl-shader object with shims for all of the uniforms and at
 * `uniforms` is a list of all uniforms exported by the shader program
 * `attributes` is a list of all attributes exported by the shader program
 
+The uniform and attributes variables have output which is consistent with [glsl-extract](https://npmjs.org/package/glsl-extract)
+
 **Returns** A compiled shader object.
 
 
@@ -121,7 +123,7 @@ gl.disableVertexAttribArray(attrib.location)
 Finally, the library supports some reflection capabilities.  The set of all uniforms and data types are stored in the "type" property of the shader object,
 
 ```javascript
-console.log(shader.type)
+console.log(shader.types)
 ```
 
 This reflects the uniform and attribute parameters that were passed to the shader constructor.
