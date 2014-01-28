@@ -1,6 +1,6 @@
 {
   "name": "gl-shader-core",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Core implementation of gl-shader without parser dependencies",
   "main": "shader-core.js",
   "scripts": {
