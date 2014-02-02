@@ -7,14 +7,14 @@ var makeReflect = require("./lib/reflect.js")
 //Shader object
 function Shader(gl, prog, attributes, typeInfo) {
   this.gl = gl
-  this.program = prog
+  this.handle = prog
   this.attributes = attributes
   this.types = typeInfo
 }
 
 //Binds the shader
 Shader.prototype.bind = function() {
-  this.gl.useProgram(this.program)
+  this.gl.useProgram(this.handle)
 }
 
 //Relinks all uniforms
