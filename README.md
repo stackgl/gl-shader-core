@@ -128,5 +128,11 @@ console.log(shader.types)
 
 This reflects the uniform and attribute parameters that were passed to the shader constructor.
 
+## Cleanup
+
+### `shader.dispose()`
+
+Deletes the shader program and associated resources.
+
 ## Credits
 (c) 2013 Mikola Lysenko. MIT License

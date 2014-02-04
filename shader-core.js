@@ -5,16 +5,26 @@ var createAttributeWrapper = require("./lib/create-attributes.js")
 var makeReflect = require("./lib/reflect.js")
 
 //Shader object
-function Shader(gl, prog, attributes, typeInfo) {
+function Shader(gl, prog, attributes, typeInfo, vertShader, fragShader) {
   this.gl = gl
   this.handle = prog
   this.attributes = attributes
   this.types = typeInfo
+  this.vertShader = vertShader
+  this.fragShader = fragShader
 }
 
 //Binds the shader
 Shader.prototype.bind = function() {
   this.gl.useProgram(this.handle)
+}
+
+Shader.prototype.dispose = function() {
+  var gl = this.gl
+
+  gl.deleteShader(this.vertShader)
+  gl.deleteShader(this.fragShader)
+  gl.deleteProgram(this.handle)
 }
 
 //Relinks all uniforms
@@ -73,7 +83,11 @@ function createShader(
       doLink), { 
         uniforms: makeReflect(uniforms), 
         attributes: makeReflect(attributes)
-    })
+    },
+    vertShader,
+    fragShader
+  )
+
   Object.defineProperty(shader, "uniforms", createUniformWrapper(
     gl, 
     program, 
