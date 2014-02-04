@@ -25,6 +25,9 @@ Shader.prototype.dispose = function() {
   gl.deleteShader(this.vertShader)
   gl.deleteShader(this.fragShader)
   gl.deleteProgram(this.handle)
+  this.vertShader = null
+  this.fragShader = null
+  this.handle = null
 }
 
 //Relinks all uniforms

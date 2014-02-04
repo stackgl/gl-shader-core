@@ -22,6 +22,28 @@ The uniform and attributes variables have output which is consistent with [glsl-
 **Returns** A compiled shader object.
 
 
+## Methods
+
+### `shader.bind()`
+Binds the shader for rendering
+
+### `shader.dispose()`
+Deletes the shader program and associated resources.
+
+## Properties
+
+### `gl`
+The WebGL context associated to the shader
+
+### `handle`
+A handle to the underlying WebGL program object
+
+### `vertShader`
+A handle to the underlying WebGL fragment shader object
+
+### `fragShader`
+A handle to the underlying WebGL vertex shader object
+
 ## Uniforms
 The uniforms for the shader program are packaged up as properties in the `shader.uniforms` object.  For example, to update a scalar uniform you can just assign to it:
 
@@ -128,11 +150,6 @@ console.log(shader.types)
 
 This reflects the uniform and attribute parameters that were passed to the shader constructor.
 
-## Cleanup
-
-### `shader.dispose()`
-
-Deletes the shader program and associated resources.
 
 ## Credits
 (c) 2013 Mikola Lysenko. MIT License
