@@ -10,8 +10,8 @@ function Shader(gl, prog, attributes, typeInfo, vertShader, fragShader) {
   this.handle = prog
   this.attributes = attributes
   this.types = typeInfo
-  this.vertShader = vertShader
-  this.fragShader = fragShader
+  this.vertexShader = vertShader
+  this.fragmentShader = fragShader
 }
 
 //Binds the shader
@@ -19,15 +19,12 @@ Shader.prototype.bind = function() {
   this.gl.useProgram(this.handle)
 }
 
+//Destroy shader, release resources
 Shader.prototype.dispose = function() {
   var gl = this.gl
-
-  gl.deleteShader(this.vertShader)
-  gl.deleteShader(this.fragShader)
+  gl.deleteShader(this.vertexShader)
+  gl.deleteShader(this.fragmentShader)
   gl.deleteProgram(this.handle)
-  this.vertShader = null
-  this.fragShader = null
-  this.handle = null
 }
 
 //Relinks all uniforms

@@ -38,10 +38,10 @@ The WebGL context associated to the shader
 ### `handle`
 A handle to the underlying WebGL program object
 
-### `vertShader`
+### `vertexShader`
 A handle to the underlying WebGL fragment shader object
 
-### `fragShader`
+### `fragmentShader`
 A handle to the underlying WebGL vertex shader object
 
 ## Uniforms
