@@ -91,16 +91,7 @@ For non-array attributes you can set the constant value to be broadcast across a
 shader.attributes.color = [1, 0, 0, 1]
 ```
 
-This internally uses [`gl.vertexAttribnf`](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttrib.xml).  You can also assign to the attribute by calling:
-
-```javascript
-shader.attributes.color.set(1, 0, 0, 1)
-
-//Or:
-shader.attributes.color.set([1, 0, 0, 1])
-```
-
-Setting the attribute will also call `gl.disableVertexAttribArray` on the attribute's location.
+This internally uses [`gl.vertexAttribnf`](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttrib.xml). Setting the attribute will also call `gl.disableVertexAttribArray` on the attribute's location.
 
 ### `attrib.location`
 This property accesses the location of the attribute.  You can assign/read from it to modify the location of the attribute.  For example, you can update the location by doing:
