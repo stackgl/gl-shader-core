@@ -84,7 +84,7 @@ shader.uniforms.light[0].color = [1, 0, 0, 1]
 
 The basic idea behind the attribute interface is similar to that for uniforms, however because attributes can be either a constant value or get values from a vertex array they have a slightly more complicated interface.  All of the attributes are stored in the `shader.attributes` property.
 
-### `attrib.set()`
+### `attrib = constant`
 For non-array attributes you can set the constant value to be broadcast across all vertices.  For example, to set the vertex color of a shader to a constant you could do:
 
 ```javascript
