@@ -38,10 +38,10 @@ The WebGL context associated to the shader
 ### `handle`
 A handle to the underlying WebGL program object
 
-### `vertShader`
+### `vertexShader`
 A handle to the underlying WebGL fragment shader object
 
-### `fragShader`
+### `fragmentShader`
 A handle to the underlying WebGL vertex shader object
 
 ## Uniforms
@@ -84,21 +84,14 @@ shader.uniforms.light[0].color = [1, 0, 0, 1]
 
 The basic idea behind the attribute interface is similar to that for uniforms, however because attributes can be either a constant value or get values from a vertex array they have a slightly more complicated interface.  All of the attributes are stored in the `shader.attributes` property.
 
-### `attrib.set()`
+### `attrib = constant`
 For non-array attributes you can set the constant value to be broadcast across all vertices.  For example, to set the vertex color of a shader to a constant you could do:
 
 ```javascript
 shader.attributes.color = [1, 0, 0, 1]
 ```
 
-This internally uses [`gl.vertexAttribnf`](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttrib.xml).  You can also assign to the attribute by calling:
-
-```javascript
-shader.attributes.color.set(1, 0, 0, 1)
-
-//Or:
-shader.attributes.color.set([1, 0, 0, 1])
-```
+This internally uses [`gl.vertexAttribnf`](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttrib.xml). Setting the attribute will also call `gl.disableVertexAttribArray` on the attribute's location.
 
 ### `attrib.location`
 This property accesses the location of the attribute.  You can assign/read from it to modify the location of the attribute.  For example, you can update the location by doing:
@@ -118,27 +111,12 @@ Internally, these methods just call [`gl.bindAttribLocation`](http://www.khronos
 **WARNING** Changing the attribute location requires recompiling the program.  Do not dynamically modify this variable in your render loop.
 
 ### `attrib.pointer([type, normalized, stride, offset])`
-A shortcut for `gl.vertexAttribPointer`.  See the [OpenGL man page for details on how this works](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml).  The main difference here is that the WebGL context, size and index are known and so these parameters are bound.
+A shortcut for `gl.vertexAttribPointer`/`gl.enableVertexAttribArray`.  See the [OpenGL man page for details on how this works](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml).  The main difference here is that the WebGL context, size and index are known and so these parameters are bound.
 
 * `type` is the type of the pointer (default `gl.FLOAT`)
 * `normalized` specifies whether fixed-point data values should be normalized (`true`) or converted directly as fixed-point values (`false`) when they are accessed.  (Default `false`)
 * `stride` the byte offset between consecutive generic vertex attributes.  (Default: `0`)
 * `offset` offset of the first element of the array in bytes. (Default `0`)
-
-
-### `attrib.enable()`
-This [enables the vertex attribute pointer](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glEnableVertexAttribArray.xml).  It is a short cut for:
-
-```javascript
-gl.enableVertexAttribArray(attrib.location)
-```
-
-### `attrib.disable()`
-This [disables the vertex attribute pointer](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glEnableVertexAttribArray.xml).  It is a short cut for:
-
-```javascript
-gl.disableVertexAttribArray(attrib.location)
-```
 
 ## Reflection
 
