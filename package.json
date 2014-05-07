@@ -1,6 +1,6 @@
 {
   "name": "gl-shader-core",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Core implementation of gl-shader without parser dependencies",
   "main": "shader-core.js",
   "scripts": {
@@ -20,6 +20,6 @@
     "url": "https://github.com/mikolalysenko/gl-shader-core/issues"
   },
   "dependencies": {
-    "dup": "^0.0.0"
+    "dup": "^1.0.0"
   }
 }
