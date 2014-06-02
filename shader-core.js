@@ -9,6 +9,7 @@ function Shader(gl, prog, attributes, typeInfo, vertShader, fragShader) {
   this.gl = gl
   this.handle = prog
   this.attributes = attributes
+  this.uniforms = null
   this.types = typeInfo
   this.vertexShader = vertShader
   this.fragmentShader = fragShader
@@ -25,6 +26,38 @@ Shader.prototype.dispose = function() {
   gl.deleteShader(this.vertexShader)
   gl.deleteShader(this.fragmentShader)
   gl.deleteProgram(this.handle)
+}
+
+Shader.prototype.updateExports = function(uniforms, attributes) {
+  var locations = new Array(uniforms.length)
+  var program = this.handle
+  var gl = this.gl
+
+  var doLink = relinkUniforms.bind(undefined,
+    gl,
+    program,
+    locations,
+    uniforms
+  )
+
+  this.types = {
+    uniforms: makeReflect(uniforms),
+    attributes: makeReflect(attributes)
+  }
+
+  this.attributes = createAttributeWrapper(
+    gl,
+    program,
+    attributes,
+    doLink
+  )
+
+  Object.defineProperty(this, "uniforms", createUniformWrapper(
+    gl,
+    program,
+    uniforms,
+    locations
+  ))
 }
 
 //Relinks all uniforms
@@ -74,26 +107,16 @@ function createShader(
 
   //Return final linked shader object
   var shader = new Shader(
-    gl, 
+    gl,
     program,
-    createAttributeWrapper(
-      gl, 
-      program, 
-      attributes, 
-      doLink), { 
-        uniforms: makeReflect(uniforms), 
-        attributes: makeReflect(attributes)
-    },
+    null,
+    null,
     vertShader,
     fragShader
   )
 
-  Object.defineProperty(shader, "uniforms", createUniformWrapper(
-    gl, 
-    program, 
-    uniforms, 
-    locations
-  ))
+  shader.updateExports(uniforms, attributes)
+
   return shader
 }
 
