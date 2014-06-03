@@ -5,12 +5,12 @@ var createAttributeWrapper = require("./lib/create-attributes.js")
 var makeReflect = require("./lib/reflect.js")
 
 //Shader object
-function Shader(gl, prog, attributes, typeInfo, vertShader, fragShader) {
+function Shader(gl, prog, vertShader, fragShader) {
   this.gl = gl
   this.handle = prog
-  this.attributes = attributes
+  this.attributes = null
   this.uniforms = null
-  this.types = typeInfo
+  this.types = null
   this.vertexShader = vertShader
   this.fragmentShader = fragShader
 }
@@ -33,12 +33,13 @@ Shader.prototype.updateExports = function(uniforms, attributes) {
   var program = this.handle
   var gl = this.gl
 
-  var doLink = relinkUniforms.bind(undefined,
+  var doLink = relinkUniforms.bind(void 0,
     gl,
     program,
     locations,
     uniforms
   )
+  doLink()
 
   this.types = {
     uniforms: makeReflect(uniforms),
@@ -100,21 +101,13 @@ function createShader(
     throw new Error("Error linking shader program: " + gl.getProgramInfoLog (program))
   }
   
-  //Create location vector
-  var locations = new Array(uniforms.length)
-  var doLink = relinkUniforms.bind(undefined, gl, program, locations, uniforms)
-  doLink()
-
   //Return final linked shader object
   var shader = new Shader(
     gl,
     program,
-    null,
-    null,
     vertShader,
     fragShader
   )
-
   shader.updateExports(uniforms, attributes)
 
   return shader
