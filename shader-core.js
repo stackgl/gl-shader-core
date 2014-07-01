@@ -81,7 +81,9 @@ function createShader(
   gl.shaderSource(vertShader, vertSource)
   gl.compileShader(vertShader)
   if(!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
-    throw new Error("Error compiling vertex shader: " + gl.getShaderInfoLog(vertShader))
+    var errLog = gl.getShaderInfoLog(vertShader)
+    console.error("Error compling vertex shader:", errLog)
+    throw new Error("Error compiling vertex shader:" + errLog)
   }
   
   //Compile fragment shader
@@ -89,7 +91,9 @@ function createShader(
   gl.shaderSource(fragShader, fragSource)
   gl.compileShader(fragShader)
   if(!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
-    throw new Error("Error compiling fragment shader: " + gl.getShaderInfoLog(fragShader))
+    var errLog = gl.getShaderInfoLog(fragShader)
+    console.error("Error compiling fragment shader:", errLog)
+    throw new Error("Error compiling fragment shader:" + errLog)
   }
   
   //Link program
@@ -98,7 +102,9 @@ function createShader(
   gl.attachShader(program, vertShader)
   gl.linkProgram(program)
   if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    throw new Error("Error linking shader program: " + gl.getProgramInfoLog (program))
+    var errLog = gl.getProgramInfoLog(program)
+    console.error("Error linking shader program:", errLog)
+    throw new Error("Error linking shader program:" + errLog)
   }
   
   //Return final linked shader object
