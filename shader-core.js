@@ -1,8 +1,8 @@
-"use strict"
+'use strict'
 
-var createUniformWrapper = require("./lib/create-uniforms.js")
-var createAttributeWrapper = require("./lib/create-attributes.js")
-var makeReflect = require("./lib/reflect.js")
+var createUniformWrapper = require('./lib/create-uniforms')
+var createAttributeWrapper = require('./lib/create-attributes')
+var makeReflect = require('./lib/reflect')
 
 //Shader object
 function Shader(gl, prog, vertShader, fragShader) {
@@ -53,7 +53,7 @@ Shader.prototype.updateExports = function(uniforms, attributes) {
     doLink
   )
 
-  Object.defineProperty(this, "uniforms", createUniformWrapper(
+  Object.defineProperty(this, 'uniforms', createUniformWrapper(
     gl,
     program,
     uniforms,
@@ -82,8 +82,8 @@ function createShader(
   gl.compileShader(vertShader)
   if(!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
     var errLog = gl.getShaderInfoLog(vertShader)
-    console.error("Error compling vertex shader:", errLog)
-    throw new Error("Error compiling vertex shader:" + errLog)
+    console.error('gl-shader: Error compling vertex shader:', errLog)
+    throw new Error('gl-shader: Error compiling vertex shader:' + errLog)
   }
   
   //Compile fragment shader
@@ -92,8 +92,8 @@ function createShader(
   gl.compileShader(fragShader)
   if(!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
     var errLog = gl.getShaderInfoLog(fragShader)
-    console.error("Error compiling fragment shader:", errLog)
-    throw new Error("Error compiling fragment shader:" + errLog)
+    console.error('gl-shader: Error compiling fragment shader:', errLog)
+    throw new Error('gl-shader: Error compiling fragment shader:' + errLog)
   }
   
   //Link program
@@ -103,8 +103,8 @@ function createShader(
   gl.linkProgram(program)
   if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     var errLog = gl.getProgramInfoLog(program)
-    console.error("Error linking shader program:", errLog)
-    throw new Error("Error linking shader program:" + errLog)
+    console.error('gl-shader: Error linking shader program:', errLog)
+    throw new Error('gl-shader: Error linking shader program:' + errLog)
   }
   
   //Return final linked shader object
