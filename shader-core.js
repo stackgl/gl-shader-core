@@ -100,6 +100,13 @@ function createShader(
   var program = gl.createProgram()
   gl.attachShader(program, fragShader)
   gl.attachShader(program, vertShader)
+
+  //Optional default attriubte locations
+  attributes.forEach(function(a) {
+    if (typeof a.location === 'number') 
+      gl.bindAttribLocation(program, a.location, a.name)
+  })
+
   gl.linkProgram(program)
   if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     var errLog = gl.getProgramInfoLog(program)
