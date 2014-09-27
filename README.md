@@ -17,10 +17,11 @@ Constructs a packaged gl-shader object with shims for all of the uniforms and at
 * `uniforms` is a list of all uniforms exported by the shader program
 * `attributes` is a list of all attributes exported by the shader program
 
-The uniform and attributes variables have output which is consistent with [glsl-extract](https://npmjs.org/package/glsl-extract)
+The uniform and attributes variables have output which is consistent with [glsl-extract](https://npmjs.org/package/glsl-extract). 
 
 **Returns** A compiled shader object.
 
+You can specify a default `location` number for each attribute, otherwise WebGL will bind it automatically. 
 
 ## Methods
 
