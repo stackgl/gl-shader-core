@@ -20,6 +20,7 @@
     "url": "https://github.com/mikolalysenko/gl-shader-core/issues"
   },
   "dependencies": {
-    "dup": "^1.0.0"
+    "dup": "^1.0.0",
+    "weakmap": "0.0.6"
   }
 }

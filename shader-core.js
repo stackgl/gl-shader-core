@@ -1,71 +1,114 @@
 'use strict'
 
-var createUniformWrapper = require('./lib/create-uniforms')
+var createUniformWrapper   = require('./lib/create-uniforms')
 var createAttributeWrapper = require('./lib/create-attributes')
-var makeReflect = require('./lib/reflect')
+var makeReflect            = require('./lib/reflect')
+var createProgram          = require('./lib/shader-cache')
 
 //Shader object
-function Shader(gl, prog, vertShader, fragShader) {
-  this.gl = gl
-  this.handle = prog
-  this.attributes = null
-  this.uniforms = null
-  this.types = null
-  this.vertexShader = vertShader
-  this.fragmentShader = fragShader
+function Shader(gl, vsrc, fsrc) {
+  this.gl                   = gl
+  this._vertSource          = vsrc
+  this._fragSource          = fsrc
+  
+  //Temporarily zero out
+  this.program    =
+  this.attributes =
+  this.uniforms   =
+  this.types      = null
 }
+
+var proto = Shader.prototype
 
 //Binds the shader
-Shader.prototype.bind = function() {
-  this.gl.useProgram(this.handle)
+proto.bind = function() {
+  this.gl.useProgram(this.program)
 }
 
-//Destroy shader, release resources
-Shader.prototype.dispose = function() {
-  var gl = this.gl
-  gl.deleteShader(this.vertexShader)
-  gl.deleteShader(this.fragmentShader)
-  gl.deleteProgram(this.handle)
+proto.dispose = function() {
+  //TODO:  How to manage this?
+  //
+  //Leaking shader/progs seems reasonable since they are
+  //small resources and rebuilding them is expensive
+  //
 }
 
-Shader.prototype.updateExports = function(uniforms, attributes) {
-  var locations = new Array(uniforms.length)
-  var program = this.handle
-  var gl = this.gl
+function defaultLocations(names) {
+  var zipped = names.map(function(n, i) {
+    return [n,i]
+  })
+  zipped.sort(function(a,b) {
+    return a < b ? 1 : 0
+  })
+  return zipped.map(function(p) {
+    return p[1]
+  })
+}
 
-  var doLink = relinkUniforms.bind(void 0,
-    gl,
-    program,
-    locations,
+//Update export hook for glslify-live
+proto.updateExports = function(
     uniforms
-  )
-  doLink()
+  , attributes
+  , attributeLocations) {
 
+  var wrapper = this
+  var gl      = wrapper.gl
+  var uniformLocations = new Array(uniforms.length)  
+  var attributeNames = attributes.map(function(attr) {
+    return attr.name
+  })
+
+  //Read in attribute locations
+  if(!Array.isArray(attributeLocations) ||
+      attributes.length !== attributeLocations.length) {
+    attributeLocations = defaultLocations(attributeNames)
+  } else {
+    attributeLocations = attributeLocations.slice()
+  }
+
+
+  //Relinks all uniforms
+  function relink() {
+
+    //Build program
+    wrapper.program = createProgram(
+        gl
+      , wrapper.vsrc
+      , wrapper.fsrc
+      , attributeNames
+      , attributeLocations)
+
+    //Get all the uniform locations
+    for(var i=0; i<uniforms.length; ++i) {
+      uniformLocations[i] = gl.getUniformLocation(
+          wrapper.program
+        , uniforms[i].name)
+    }
+  }
+
+  //Relink the program
+  relink()
+
+  //Generate type info
   this.types = {
-    uniforms: makeReflect(uniforms),
+    uniforms:   makeReflect(uniforms),
     attributes: makeReflect(attributes)
   }
 
+  //Generate attribute wrappers
   this.attributes = createAttributeWrapper(
-    gl,
-    program,
-    attributes,
-    doLink
-  )
+      gl
+    , program
+    , attributes
+    , attributeLocations
+    , relink)
 
+  //Generate uniform wrappers
   Object.defineProperty(this, 'uniforms', createUniformWrapper(
-    gl,
-    program,
-    uniforms,
-    locations
-  ))
-}
-
-//Relinks all uniforms
-function relinkUniforms(gl, program, locations, uniforms) {
-  for(var i=0; i<uniforms.length; ++i) {
-    locations[i] = gl.getUniformLocation(program, uniforms[i].name)
-  }
+      gl
+    , program
+    , uniforms
+    , uniformLocations))
 }
 
 //Compiles and links a shader program with the given attribute and vertex list
@@ -74,53 +117,14 @@ function createShader(
   , vertSource
   , fragSource
   , uniforms
-  , attributes) {
-  
-  //Compile vertex shader
-  var vertShader = gl.createShader(gl.VERTEX_SHADER)
-  gl.shaderSource(vertShader, vertSource)
-  gl.compileShader(vertShader)
-  if(!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
-    var errLog = gl.getShaderInfoLog(vertShader)
-    console.error('gl-shader: Error compling vertex shader:', errLog)
-    throw new Error('gl-shader: Error compiling vertex shader:' + errLog)
-  }
-  
-  //Compile fragment shader
-  var fragShader = gl.createShader(gl.FRAGMENT_SHADER)
-  gl.shaderSource(fragShader, fragSource)
-  gl.compileShader(fragShader)
-  if(!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
-    var errLog = gl.getShaderInfoLog(fragShader)
-    console.error('gl-shader: Error compiling fragment shader:', errLog)
-    throw new Error('gl-shader: Error compiling fragment shader:' + errLog)
-  }
-  
-  //Link program
-  var program = gl.createProgram()
-  gl.attachShader(program, fragShader)
-  gl.attachShader(program, vertShader)
+  , attributes
+  , attributeLocations) {
 
-  //Optional default attriubte locations
-  attributes.forEach(function(a) {
-    if (typeof a.location === 'number') 
-      gl.bindAttribLocation(program, a.location, a.name)
-  })
-
-  gl.linkProgram(program)
-  if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    var errLog = gl.getProgramInfoLog(program)
-    console.error('gl-shader: Error linking shader program:', errLog)
-    throw new Error('gl-shader: Error linking shader program:' + errLog)
-  }
-  
-  //Return final linked shader object
   var shader = new Shader(
-    gl,
-    program,
-    vertShader,
-    fragShader
-  )
+      gl
+    , vertShader
+    , fragShader
+    , attributeLocations)
   shader.updateExports(uniforms, attributes)
 
   return shader
