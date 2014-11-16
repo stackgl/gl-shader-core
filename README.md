@@ -37,9 +37,6 @@ Deletes the shader program and associated resources.
 ### `gl`
 The WebGL context associated to the shader
 
-### `program`
-A handle to the underlying WebGL program object
-
 ## Uniforms
 The uniforms for the shader program are packaged up as properties in the `shader.uniforms` object.  For example, to update a scalar uniform you can just assign to it:
 

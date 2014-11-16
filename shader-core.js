@@ -12,6 +12,7 @@ function Shader(gl, vsrc, fsrc) {
   this._fragSource          = fsrc
   
   //Temporarily zero out
+  this._relink    =
   this.program    =
   this.attributes =
   this.uniforms   =
@@ -22,6 +23,9 @@ var proto = Shader.prototype
 
 //Binds the shader
 proto.bind = function() {
+  if(!this.program) {
+    this._relink()
+  }
   this.gl.useProgram(this.program)
 }
 
@@ -36,39 +40,51 @@ proto.dispose = function() {
   //
 }
 
-function defaultLocations(names) {
-  var zipped = names.map(function(n, i) {
-    return [n,i]
-  })
-  zipped.sort(function(a,b) {
-    return a < b ? 1 : 0
-  })
-  return zipped.map(function(p) {
-    return p[1]
-  })
-}
-
 //Update export hook for glslify-live
 proto.updateExports = function(
     uniforms
-  , attributes
-  , attributeLocations) {
+  , attributes) {
 
   var wrapper = this
   var gl      = wrapper.gl
-  var uniformLocations = new Array(uniforms.length)  
+  var uniformLocations = new Array(uniforms.length)
+
+  //Sort attributes lexicographically
+  attributes = attributes.slice()
+  attributes.sort(function(a, b) {
+    if(a.name < b.name) {
+      return -1
+    } else if(a.name > b.name) {
+      return 1
+    }
+    return 0
+  })
+
+  //Extract names
   var attributeNames = attributes.map(function(attr) {
     return attr.name
   })
 
-  //Read in attribute locations
-  if(!Array.isArray(attributeLocations) ||
-      attributes.length !== attributeLocations.length) {
-    attributeLocations = defaultLocations(attributeNames)
-  } else {
-    attributeLocations = attributeLocations.slice()
+  //Get default location
+  var attributeLocations = attributes.map(function(attr) {
+    if('location' in attr) {
+      return attr.location|0
+    } else {
+      return -1
+    }
+  })
+
+  //For all unspecified attributes, assign them lexicographically min attribute
+  var curLocation = 0
+  for(var i=0; i<attributeLocations.length; ++i) {
+    if(attributeLocations[i] < 0) {
+      while(attributeLocations.indexOf(curLocation) >= 0) {
+        curLocation += 1
+      }
+      attributeLocations[i] = curLocation
+    }
   }
-  
+
   //Relinks all uniforms
   function relink() {
 
@@ -88,8 +104,11 @@ proto.updateExports = function(
     }
   }
 
-  //Relink the program
+  //Perform initial linking
   relink()
+
+  //Save relinking procedure, defer until runtime
+  wrapper._relink = relink
 
   //Generate type info
   wrapper.types = {
@@ -119,14 +138,12 @@ function createShader(
   , vertSource
   , fragSource
   , uniforms
-  , attributes
-  , attributeLocations) {
+  , attributes) {
 
   var shader = new Shader(
       gl
     , vertSource
-    , fragSource
-    , attributeLocations)
+    , fragSource)
   shader.updateExports(uniforms, attributes)
 
   return shader
