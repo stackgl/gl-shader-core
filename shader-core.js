@@ -26,10 +26,13 @@ proto.bind = function() {
 }
 
 proto.dispose = function() {
-  //TODO:  How to manage this?
+  //Now a no-op, maintained for backwards compatibility
+
+  //Leaking shader objects is reasonable since they:
   //
-  //Leaking shader/progs seems reasonable since they are
-  //small resources and rebuilding them is expensive
+  // 1. have expensive construction
+  // 2. use a relatively small amount of GPU memory
+  // 3. could be used by user space programs in the future
   //
 }
 
@@ -73,8 +76,8 @@ proto.updateExports = function(
     //Build program
     wrapper.program = createProgram(
         gl
-      , wrapper.vsrc
-      , wrapper.fsrc
+      , wrapper._vertSource
+      , wrapper._fragSource
       , attributeNames
       , attributeLocations)
 
@@ -90,23 +93,23 @@ proto.updateExports = function(
   relink()
 
   //Generate type info
-  this.types = {
+  wrapper.types = {
     uniforms:   makeReflect(uniforms),
     attributes: makeReflect(attributes)
   }
 
   //Generate attribute wrappers
-  this.attributes = createAttributeWrapper(
+  wrapper.attributes = createAttributeWrapper(
       gl
-    , program
+    , wrapper
     , attributes
     , attributeLocations
     , relink)
 
   //Generate uniform wrappers
-  Object.defineProperty(this, 'uniforms', createUniformWrapper(
+  Object.defineProperty(wrapper, 'uniforms', createUniformWrapper(
       gl
-    , program
+    , wrapper
     , uniforms
     , uniformLocations))
 }
@@ -122,8 +125,8 @@ function createShader(
 
   var shader = new Shader(
       gl
-    , vertShader
-    , fragShader
+    , vertSource
+    , fragSource
     , attributeLocations)
   shader.updateExports(uniforms, attributes)
 
