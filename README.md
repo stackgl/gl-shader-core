@@ -8,7 +8,7 @@ The core of [gl-shader](https://github.com/mikolalysenko/gl-shader), without the
     
 ## API
 
-### `var shader = require("gl-shader-core")(gl, vertexSource, fragmentSource, uniforms, attributes, attributeLocations)`
+### `var shader = require("gl-shader-core")(gl, vertexSource, fragmentSource, uniforms, attributes)`
 Constructs a packaged gl-shader object with shims for all of the uniforms and attributes in the program.
 
 * `gl` is the webgl context in which the program will be created
@@ -16,7 +16,6 @@ Constructs a packaged gl-shader object with shims for all of the uniforms and at
 * `fragmentSource` is the source code for the fragment shader
 * `uniforms` is a list of all uniforms exported by the shader program
 * `attributes` is a list of all attributes exported by the shader program
-* `attributeLocations` is a list of default attribute locations
 
 The uniform and attributes variables have output which is consistent with [glsl-extract](https://npmjs.org/package/glsl-extract). 
 
@@ -99,9 +98,7 @@ Or you can read the currently bound location back by just accessing it:
 console.log(attrib.location)
 ```
 
-Internally, these methods just call [`gl.bindAttribLocation`](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glBindAttribLocation.xml) and access the stored location.
-
-**WARNING** Changing the attribute location requires recompiling the program.  Do not dynamically modify this variable in your render loop.
+**WARNING** Changing the attribute location requires recompiling the program. This recompilation is deferred until the next call to `.bind()`
 
 ### `attrib.pointer([type, normalized, stride, offset])`
 A shortcut for `gl.vertexAttribPointer`/`gl.enableVertexAttribArray`.  See the [OpenGL man page for details on how this works](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml).  The main difference here is that the WebGL context, size and index are known and so these parameters are bound.
@@ -120,7 +117,6 @@ console.log(shader.types)
 ```
 
 This reflects the uniform and attribute parameters that were passed to the shader constructor.
-
 
 ## Credits
 (c) 2013 Mikola Lysenko. MIT License
