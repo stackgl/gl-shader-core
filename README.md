@@ -8,7 +8,7 @@ The core of [gl-shader](https://github.com/mikolalysenko/gl-shader), without the
     
 ## API
 
-### `var shader = require("gl-shader-core")(gl, vertexSource, fragmentSource, uniforms, attributes)`
+### `var shader = require("gl-shader-core")(gl, vertexSource, fragmentSource, uniforms, attributes, attributeLocations)`
 Constructs a packaged gl-shader object with shims for all of the uniforms and attributes in the program.
 
 * `gl` is the webgl context in which the program will be created
@@ -16,6 +16,7 @@ Constructs a packaged gl-shader object with shims for all of the uniforms and at
 * `fragmentSource` is the source code for the fragment shader
 * `uniforms` is a list of all uniforms exported by the shader program
 * `attributes` is a list of all attributes exported by the shader program
+* `attributeLocations` is a list of default attribute locations
 
 The uniform and attributes variables have output which is consistent with [glsl-extract](https://npmjs.org/package/glsl-extract). 
 
@@ -36,14 +37,8 @@ Deletes the shader program and associated resources.
 ### `gl`
 The WebGL context associated to the shader
 
-### `handle`
+### `program`
 A handle to the underlying WebGL program object
-
-### `vertexShader`
-A handle to the underlying WebGL fragment shader object
-
-### `fragmentShader`
-A handle to the underlying WebGL vertex shader object
 
 ## Uniforms
 The uniforms for the shader program are packaged up as properties in the `shader.uniforms` object.  For example, to update a scalar uniform you can just assign to it:

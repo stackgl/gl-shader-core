@@ -68,8 +68,7 @@ proto.updateExports = function(
   } else {
     attributeLocations = attributeLocations.slice()
   }
-
-
+  
   //Relinks all uniforms
   function relink() {
 
