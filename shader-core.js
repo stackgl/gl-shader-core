@@ -32,7 +32,10 @@ proto.bind = function() {
 proto.dispose = function() {
   this._fref.dispose()
   this._vref.dispose()
-  this._fref = this._vref = null
+  this.program = 
+  this._relink = 
+  this._fref   = 
+  this._vref   = null
 }
 
 //Update export hook for glslify-live
