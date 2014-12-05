@@ -3,13 +3,13 @@
 var createUniformWrapper   = require('./lib/create-uniforms')
 var createAttributeWrapper = require('./lib/create-attributes')
 var makeReflect            = require('./lib/reflect')
-var createProgram          = require('./lib/shader-cache')
+var shaderCache            = require('./lib/shader-cache')
 
 //Shader object
-function Shader(gl, vsrc, fsrc) {
-  this.gl                   = gl
-  this._vertSource          = vsrc
-  this._fragSource          = fsrc
+function Shader(gl, vref, fref) {
+  this.gl         = gl
+  this._vref      = vref
+  this._fref      = fref
   
   //Temporarily zero out
   this._relink    =
@@ -30,14 +30,9 @@ proto.bind = function() {
 }
 
 proto.dispose = function() {
-  //Now a no-op, maintained for backwards compatibility
-
-  //Leaking shader objects is reasonable since they:
-  //
-  // 1. have expensive construction
-  // 2. use a relatively small amount of GPU memory
-  // 3. could be used by user space programs in the future
-  //
+  this._fref.dispose()
+  this._vref.dispose()
+  this._fref = this._vref = null
 }
 
 //Update export hook for glslify-live
@@ -89,10 +84,10 @@ proto.updateExports = function(
   function relink() {
 
     //Build program
-    wrapper.program = createProgram(
+    wrapper.program = shaderCache.program(
         gl
-      , wrapper._vertSource
-      , wrapper._fragSource
+      , wrapper._vref
+      , wrapper._fref
       , attributeNames
       , attributeLocations)
 
@@ -142,8 +137,8 @@ function createShader(
 
   var shader = new Shader(
       gl
-    , vertSource
-    , fragSource)
+    , shaderCache.shader(gl, gl.VERTEX_SHADER,   vertSource)
+    , shaderCache.shader(gl, gl.FRAGMENT_SHADER, fragSource))
   shader.updateExports(uniforms, attributes)
 
   return shader
