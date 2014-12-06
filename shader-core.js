@@ -4,15 +4,18 @@ var createUniformWrapper   = require('./lib/create-uniforms')
 var createAttributeWrapper = require('./lib/create-attributes')
 var makeReflect            = require('./lib/reflect')
 var shaderCache            = require('./lib/shader-cache')
+var runtime                = require('./lib/runtime-reflect')
 
 //Shader object
-function Shader(gl, vref, fref) {
+function Shader(gl) {
   this.gl         = gl
-  this._vref      = vref
-  this._fref      = fref
-  
-  //Temporarily zero out
+
+  //Default initialize these to null
+  this._vref      = 
+  this._fref      = 
   this._relink    =
+  this.vertShader =
+  this.fragShader =
   this.program    =
   this.attributes =
   this.uniforms   =
@@ -21,7 +24,6 @@ function Shader(gl, vref, fref) {
 
 var proto = Shader.prototype
 
-//Binds the shader
 proto.bind = function() {
   if(!this.program) {
     this._relink()
@@ -30,24 +32,79 @@ proto.bind = function() {
 }
 
 proto.dispose = function() {
-  this._fref.dispose()
-  this._vref.dispose()
-  this.program = 
-  this._relink = 
-  this._fref   = 
-  this._vref   = null
+  if(this._fref) {
+    this._fref.dispose()
+  }
+  if(this._vref) {
+    this._vref.dispose()
+  }
+  this.attributes =
+  this.types      =
+  this.vertShader =
+  this.fragShader =
+  this.program    = 
+  this._relink    = 
+  this._fref      = 
+  this._vref      = null
 }
 
 //Update export hook for glslify-live
-proto.updateExports = function(
-    uniforms
+proto.update = function(
+    vertSource
+  , fragSource
+  , uniforms
   , attributes) {
+
+  //If only one object passed, assume glslify style output
+  if(!fragSource || arguments.length === 1) {
+    var obj = vertSource
+    vertSource = obj.vertex
+    fragSource = obj.fragment
+    uniforms   = obj.uniforms
+    attributes = obj.attributes
+  }
 
   var wrapper = this
   var gl      = wrapper.gl
-  var uniformLocations = new Array(uniforms.length)
+
+  //Compile vertex and fragment shaders
+  var pvref = wrapper._vref
+  wrapper._vref = shaderCache.shader(gl, gl.VERTEX_SHADER, vertSource)
+  if(pvref) {
+    pvref.dispose()
+  }
+  wrapper.vertShader = wrapper._vref.shader
+  var pfref = this._fref
+  wrapper._fref = shaderCache.shader(gl, gl.FRAGMENT_SHADER, fragSource)
+  if(pfref) {
+    pfref.dispose()
+  }
+  wrapper.fragShader = wrapper._fref.shader
+  
+  //If uniforms/attributes is not specified, use RT reflection
+  if(!uniforms || !attributes) {
+
+    //Create initial test program
+    var testProgram = gl.createProgram()
+    gl.attachShader(testProgram, wrapper.fragShader)
+    gl.attachShader(testProgram, wrapper.vertShader)
+    gl.linkProgram(testProgram)
+    if(!gl.getProgramParameter(testProgram, gl.LINK_STATUS)) {
+      var errLog = gl.getProgramInfoLog(testProgram)
+      console.error('gl-shader: Error linking program:', errLog)
+      throw new Error('gl-shader: Error linking program:' + errLog)
+    }
+    
+    //Load data from runtime
+    uniforms   = uniforms   || runtime.uniforms(gl, testProgram)
+    attributes = attributes || runtime.attributes(gl, testProgram)
+
+    //Release test program
+    gl.deleteProgram(testProgram)
+  }
 
   //Sort attributes lexicographically
+  // overrides undefined WebGL behavior for attribute locations
   attributes = attributes.slice()
   attributes.sort(function(a, b) {
     if(a.name < b.name) {
@@ -83,18 +140,17 @@ proto.updateExports = function(
     }
   }
 
-  //Relinks all uniforms
-  function relink() {
-
-    //Build program
+  //Rebuild program and recompute all uniform locations
+  var uniformLocations = new Array(uniforms.length)
+  function relink(prog) {
     wrapper.program = shaderCache.program(
         gl
       , wrapper._vref
       , wrapper._fref
       , attributeNames
-      , attributeLocations)
+      , attributeLocations
+      , prog)
 
-    //Get all the uniform locations
     for(var i=0; i<uniforms.length; ++i) {
       uniformLocations[i] = gl.getUniformLocation(
           wrapper.program
@@ -102,7 +158,7 @@ proto.updateExports = function(
     }
   }
 
-  //Perform initial linking
+  //Perform initial linking, reuse program used for reflection
   relink()
 
   //Save relinking procedure, defer until runtime
@@ -119,8 +175,7 @@ proto.updateExports = function(
       gl
     , wrapper
     , attributes
-    , attributeLocations
-    , relink)
+    , attributeLocations)
 
   //Generate uniform wrappers
   Object.defineProperty(wrapper, 'uniforms', createUniformWrapper(
@@ -138,11 +193,13 @@ function createShader(
   , uniforms
   , attributes) {
 
-  var shader = new Shader(
-      gl
-    , shaderCache.shader(gl, gl.VERTEX_SHADER,   vertSource)
-    , shaderCache.shader(gl, gl.FRAGMENT_SHADER, fragSource))
-  shader.updateExports(uniforms, attributes)
+  var shader = new Shader(gl)
+
+  shader.update(
+      vertSource
+    , fragSource
+    , uniforms
+    , attributes)
 
   return shader
 }
