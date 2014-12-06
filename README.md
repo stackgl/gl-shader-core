@@ -8,35 +8,68 @@ The core of [gl-shader](https://github.com/mikolalysenko/gl-shader), without the
     
 ## API
 
-### `var shader = require("gl-shader-core")(gl, vertexSource, fragmentSource, uniforms, attributes)`
-Constructs a packaged gl-shader object with shims for all of the uniforms and attributes in the program.
+```javascript
+var createShader = require('gl-shader-core')
+```
+
+### Constructor
+
+There are two main usages for the constructor.  First,
+
+#### `var shader = createShader(vertexSource, fragmentSource[, uniforms, attributes])`
+
+Constructs a wrapped shader object with shims for all of the uniforms and attributes in the program.
 
 * `gl` is the webgl context in which the program will be created
 * `vertexSource` is the source code for the vertex shader
 * `fragmentSource` is the source code for the fragment shader
-* `uniforms` is a list of all uniforms exported by the shader program
-* `attributes` is a list of all attributes exported by the shader program
+* `uniforms` is an (optional) list of all uniforms exported by the shader program
+* `attributes` is an (optional) list of all attributes exported by the shader program
 
-The uniform and attributes variables have output which is consistent with [glsl-extract](https://npmjs.org/package/glsl-extract). 
+The format of `uniforms` and `attributes` is consistent with `glslify`'s output
 
 **Returns** A compiled shader object.
 
 You can specify a default `location` number for each attribute, otherwise WebGL will bind it automatically. 
 
-## Methods
+#### `var shader = createShader(gl, glslifyResult)`
 
-### `shader.bind()`
+Constructs a shader object from the output of `glslify`.
+
+* `gl` is a WebGL context
+* `glslify` is the output of `glslify`
+
+**Returns** A wrapped shader object
+
+### Methods
+
+#### `shader.bind()`
 Binds the shader for rendering
 
-### `shader.dispose()`
+#### `shader.update(vertSource, fragSource[, uniforms, attributes])`
+Rebuilds the shader object with new vertex and fragment shaders (same behavior as constructor)
+
+#### `shader.update(glslifyResult)`
+Rebuilds the shader object with new vertex and fragment shaders (same behavior as constructor)
+
+#### `shader.dispose()`
 Deletes the shader program and associated resources.
 
-## Properties
+### Properties
 
-### `gl`
+#### `gl`
 The WebGL context associated to the shader
 
-## Uniforms
+#### `program`
+A reference to the underlying program object in the WebGL context
+
+#### `vertShader`
+A reference to the underlying vertex shader object
+
+#### `fragShader`
+A reference to the underlying fragment shader object
+
+### Uniforms
 The uniforms for the shader program are packaged up as properties in the `shader.uniforms` object.  For example, to update a scalar uniform you can just assign to it:
 
 ```javascript
@@ -72,11 +105,11 @@ Struct uniforms can also be accessed using the normal dot property syntax.  For 
 shader.uniforms.light[0].color = [1, 0, 0, 1]
 ```
 
-## Attributes
+### Attributes
 
 The basic idea behind the attribute interface is similar to that for uniforms, however because attributes can be either a constant value or get values from a vertex array they have a slightly more complicated interface.  All of the attributes are stored in the `shader.attributes` property.
 
-### `attrib = constant`
+#### `attrib = constant`
 For non-array attributes you can set the constant value to be broadcast across all vertices.  For example, to set the vertex color of a shader to a constant you could do:
 
 ```javascript
@@ -108,7 +141,7 @@ A shortcut for `gl.vertexAttribPointer`/`gl.enableVertexAttribArray`.  See the [
 * `stride` the byte offset between consecutive generic vertex attributes.  (Default: `0`)
 * `offset` offset of the first element of the array in bytes. (Default `0`)
 
-## Reflection
+### Reflection
 
 Finally, the library supports some reflection capabilities.  The set of all uniforms and data types are stored in the "type" property of the shader object,
 
@@ -119,4 +152,4 @@ console.log(shader.types)
 This reflects the uniform and attribute parameters that were passed to the shader constructor.
 
 ## Credits
-(c) 2013 Mikola Lysenko. MIT License
+(c) 2013-2014 Mikola Lysenko. MIT License
