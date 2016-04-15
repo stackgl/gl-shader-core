@@ -17,7 +17,21 @@ Constructs a packaged gl-shader object with shims for all of the uniforms and at
 * `uniforms` is a list of all uniforms exported by the shader program
 * `attributes` is a list of all attributes exported by the shader program
 
-The uniform and attributes variables have output which is consistent with [glsl-extract](https://npmjs.org/package/glsl-extract). 
+The uniforms and attributes arrays have the following format:
+
+```js
+{
+  uniforms: [
+    { type: 'mat4', name: 'projection' },
+    { type: 'sampler2D', name: 'texture0' }
+  ],
+  attribuets: [
+    { type: 'vec3', name: 'position' }
+  ]
+}
+```
+
+The uniforms and attributes variables have output which is consistent with [glsl-extract](https://npmjs.org/package/glsl-extract). 
 
 **Returns** A compiled shader object.
 
